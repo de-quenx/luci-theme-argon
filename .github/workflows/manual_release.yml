@@ -20,6 +20,14 @@ on:
         description: "SSH connection to Actions"
         required: false
         default: "false"
+      source_repo:
+        description: "Source repository (owner/repo)"
+        required: false
+        default: "jerrykuku/luci-theme-argon"
+      source_branch:
+        description: "Source branch"
+        required: false
+        default: "master"
   push:
     branches:
       - "master"
@@ -36,7 +44,24 @@ jobs:
     outputs:
       argon_version: ${{ steps.check_version.outputs.latest_version }}
       has_update: ${{ steps.check_version.outputs.has_update }}
+      source_repo: ${{ steps.set_source.outputs.source_repo }}
+      source_branch: ${{ steps.set_source.outputs.source_branch }}
     steps:
+      - name: Set source repository
+        id: set_source
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            SOURCE_REPO="${{ github.event.inputs.source_repo }}"
+            SOURCE_BRANCH="${{ github.event.inputs.source_branch }}"
+          else
+            SOURCE_REPO="${{ github.repository }}"
+            SOURCE_BRANCH="master"
+          fi
+          echo "source_repo=${SOURCE_REPO}" >> $GITHUB_OUTPUT
+          echo "source_branch=${SOURCE_BRANCH}" >> $GITHUB_OUTPUT
+          echo "Using source repository: ${SOURCE_REPO}"
+          echo "Using source branch: ${SOURCE_BRANCH}"
+
       - name: Checkout
         uses: actions/checkout@main
         with:
@@ -100,7 +125,8 @@ jobs:
           echo "src-git-full packages https://github.com/openwrt/packages.git;master" >> feeds.conf
           echo "src-git-full luci https://github.com/openwrt/luci.git;master" >> feeds.conf
           echo "src-git-full routing https://git.openwrt.org/feed/routing.git;master"  >> feeds.conf
-          git clone -b master https://github.com/${{ github.repository }}.git package/downloads/luci-theme-argon
+          echo "Cloning from: https://github.com/${{ needs.job_check.outputs.source_repo }}.git (branch: ${{ needs.job_check.outputs.source_branch }})"
+          git clone -b ${{ needs.job_check.outputs.source_branch }} https://github.com/${{ needs.job_check.outputs.source_repo }}.git package/downloads/luci-theme-argon
           ./scripts/feeds update -a
           echo "CONFIG_PACKAGE_luci-theme-argon=m" > .config
           ./scripts/feeds install -d n luci-theme-argon
