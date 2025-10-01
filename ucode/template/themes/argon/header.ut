@@ -153,13 +153,8 @@
 						<div class="flex1">
 							<a class="showSide"></a>
 	<tr>
-<!-- 
-<td><a href='/cgi-bin/luci/admin/network/network'><img src="{{ media }}/navbar/interface.png" width="35" height="35"></a></td>
--->
-             <!-- <td><a href='/cgi-bin/luci/admin/system/tinyfm'><img src="{{ media }}/navbar/tinyfm.png" width="35" height="35"></a></td> -->
-             <!-- <td><a href='/cgi-bin/luci/admin/services/openclash'><img src="{{ media }}/navbar/openclash.png" width="35" height="35"></a></td> -->
-             <td><a href='/cgi-bin/luci/admin/services/nikki'><img src="{{ media }}/navbar/nikki.png" width="35" height="35"></a></td>
-             <td><a href='/cgi-bin/luci/admin/services/passwall'><img src="{{ media }}/navbar/passwall.png" width="35" height="35"></a></td>
+             <td><a href='/cgi-bin/luci/admin/network/network'><img src="{{ media }}/navbar/interface.png" width="35" height="35"></a></td>
+             <td><a href='/cgi-bin/luci/admin/system/tinyfm'><img src="{{ media }}/navbar/tinyfm.png" width="35" height="35"></a></td>
              <td><a href='/cgi-bin/luci/admin/services/droidnet'><img src="{{ media }}/navbar/droidnet.png" width="35" height="35"></a></td>
              <td><a href='/cgi-bin/luci/admin/modem/3ginfo-lite'><img src="{{ media }}/navbar/modem.png" width="35" height="35"></a></td>
       </tr>
@@ -171,7 +166,7 @@
 #menu {
     position: relative;
     top: -8px;
-    left: 21px;
+    left: 90px;
     margin: 0;
     padding: -5px 0;
 }
@@ -198,42 +193,73 @@
 <nav id='menu'>
     <ul>
         <li><a href='/cgi-bin/luci/admin/services/ttyd'>Terminal</a></li>
-        <li><a href='/cgi-bin/luci/admin/status/netmon'>Netmon</a></li>
+        <li><a href='/cgi-bin/luci/admin/status/netmonitor'>Netmonitor</a></li>
         <li><a href='#' target='_blank'>Zash</a></li>
         <li><a href='#' target='_blank'>Yacd</a></li>
     </ul>
 </nav>
 <script>
-(function(){
+  (function(){
     'use strict';
-    
-    function simpleDetect() {
-        const zash = document.getElementById('zash');
-        if(!zash) return;
-        
-        const hostname = window.location.hostname;
-        const baseUrl = `http://${hostname}:9090`;
-        
-        // Coba akses langsung dan set berdasarkan response
-        fetch(`${baseUrl}/ui/Nikki/`, {method: 'HEAD'})
-            .then(() => {
-                zash.href = `${baseUrl}/ui/Nikki/?host=${hostname}&port=9090`;
-                zash.textContent = 'Nikki';
-                zash.style.color = '#00ff00';
-            })
-            .catch(() => {
-                zash.href = `${baseUrl}/ui/zashboard/`;
-                zash.textContent = 'Openclash';
-                zash.style.color = '#00ff00';
-            });
+
+    const { hostname } = window.location;
+    const baseUrl = `http://${hostname}:9090`;
+
+    const elements = {
+      zash: document.getElementById('zash'),
+      yacd: document.getElementById('yacd')
+    };
+
+    if(!elements.zash || !elements.yacd) return;
+
+    const urls = {
+      nikki: `${baseUrl}/ui/Nikki/`,
+      zashboard: `${baseUrl}/ui/zashboard/`,
+      yacd: `${baseUrl}/ui/yacd/`
+    };
+
+    elements.yacd.href = urls.yacd;
+
+    function checkFavicon(url) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(url);
+        img.onerror = () => reject(url);
+        img.src = `${url}favicon.ico?${Date.now()}`;
+      });
     }
-    
+
+    function setZash(url, color, text) {
+      elements.zash.href = url;
+      elements.zash.style.color = color;
+      elements.zash.textContent = text;
+    }
+
+    async function detectUI() {
+      try {
+        const nikkiUrl = await checkFavicon(urls.nikki);
+        setZash(`${nikkiUrl}?host=${hostname}&hostname=${hostname}&port=9090`, '#00ff00', 'Nikki');
+        console.log('Nikki detected');
+      }
+      catch {
+        try {
+          const zashUrl = await checkFavicon(urls.zashboard);
+          setZash(zashUrl, '#00ff00', 'Openclash');
+          console.log('Zashboard detected');
+        }
+        catch {
+          setZash(urls.zashboard, '#fff', 'Zash');
+          console.log('No Nikki or Zashboard detected; fallback to default');
+        }
+      }
+    }
+
     if(document.readyState === 'loading'){
-        document.addEventListener('DOMContentLoaded', simpleDetect);
+      document.addEventListener('DOMContentLoaded', detectUI);
     } else {
-        simpleDetect();
+      detectUI();
     }
-})();
+  })();
 </script>
 			</header>
 			<div class="darkMask"></div>
