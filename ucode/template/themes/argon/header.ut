@@ -34,7 +34,7 @@
 
 	//Custom settings
 	let mode = 'normal';
-	let bar_color = '#5e72e4';
+	let bar_color = '#3f5582';
 	let primary, dark_primary, blur_radius, blur_radius_dark, blur_opacity, blur_opacity_dark;
 	const dark_css = readfile('/www/luci-static/argon/css/dark.css');
 	if (access('/etc/config/argon')) {
@@ -90,7 +90,7 @@
 	<link rel="apple-touch-icon" sizes="144x144" href="{{ media }}/icon/apple-icon-144x144.png">
 	<link rel="manifest" href="{{ media }}/icon/manifest.json" crossorigin="use-credentials">
 
-	<link rel="stylesheet" href="{{ media }}/css/cascade.css{# ?v=PKG_VERSION #}">
+	<link rel="stylesheet" href="{{ media }}/css/cascade.css?v=2.4.3">
 	<style title="text/css">
 		{% if (mode == 'normal'): %}
 			@media (prefers-color-scheme: dark) {
@@ -152,11 +152,89 @@
 					<div class="container">
 						<div class="flex1">
 							<a class="showSide"></a>
-							<a class="brand" href="#">{{ hostname }}</a>
+	<tr>
+<!-- 
+<td><a href='/cgi-bin/luci/admin/network/network'><img src="{{ media }}/navbar/interface.png" width="35" height="35"></a></td>
+-->
+             <!-- <td><a href='/cgi-bin/luci/admin/system/tinyfm'><img src="{{ media }}/navbar/tinyfm.png" width="35" height="35"></a></td> -->
+             <!-- <td><a href='/cgi-bin/luci/admin/services/openclash'><img src="{{ media }}/navbar/openclash.png" width="35" height="35"></a></td> -->
+             <td><a href='/cgi-bin/luci/admin/services/nikki'><img src="{{ media }}/navbar/nikki.png" width="35" height="35"></a></td>
+             <td><a href='/cgi-bin/luci/admin/services/passwall'><img src="{{ media }}/navbar/passwall.png" width="35" height="35"></a></td>
+             <td><a href='/cgi-bin/luci/admin/services/droidnet'><img src="{{ media }}/navbar/droidnet.png" width="35" height="35"></a></td>
+             <td><a href='/cgi-bin/luci/admin/modem/3ginfo-lite'><img src="{{ media }}/navbar/modem.png" width="35" height="35"></a></td>
+      </tr>
 						</div>
 						<div class="status" id="indicators"></div>
 					</div>
 				</div>
+<style>
+#menu {
+    position: relative;
+    top: -8px;
+    left: 21px;
+    margin: 0;
+    padding: -5px 0;
+}
+#menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: inline-block;
+}
+#menu li {
+    display: inline;
+}
+#menu a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 13px;
+    margin: 0 3px;
+}
+#menu a:hover {
+    text-decoration: underline;
+}
+</style>
+
+<nav id='menu'>
+    <ul>
+        <li><a href='/cgi-bin/luci/admin/services/ttyd'>Terminal</a></li>
+        <li><a href='/cgi-bin/luci/admin/status/netmon'>Netmon</a></li>
+        <li><a href='#' target='_blank'>Zash</a></li>
+        <li><a href='#' target='_blank'>Yacd</a></li>
+    </ul>
+</nav>
+<script>
+(function(){
+    'use strict';
+    
+    function simpleDetect() {
+        const zash = document.getElementById('zash');
+        if(!zash) return;
+        
+        const hostname = window.location.hostname;
+        const baseUrl = `http://${hostname}:9090`;
+        
+        // Coba akses langsung dan set berdasarkan response
+        fetch(`${baseUrl}/ui/Nikki/`, {method: 'HEAD'})
+            .then(() => {
+                zash.href = `${baseUrl}/ui/Nikki/?host=${hostname}&port=9090`;
+                zash.textContent = 'Nikki';
+                zash.style.color = '#00ff00';
+            })
+            .catch(() => {
+                zash.href = `${baseUrl}/ui/zashboard/`;
+                zash.textContent = 'Openclash';
+                zash.style.color = '#00ff00';
+            });
+    }
+    
+    if(document.readyState === 'loading'){
+        document.addEventListener('DOMContentLoaded', simpleDetect);
+    } else {
+        simpleDetect();
+    }
+})();
+</script>
 			</header>
 			<div class="darkMask"></div>
 			<div id="maincontent">
