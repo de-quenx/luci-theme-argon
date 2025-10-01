@@ -28,6 +28,10 @@ on:
         description: "Source branch"
         required: false
         default: "master"
+      force_compile:
+        description: "Force compile even if no update"
+        required: false
+        default: "false"
   push:
     branches:
       - "master"
@@ -38,7 +42,6 @@ env:
 
 jobs:
   job_check:
-    if: github.repository == ${{ github.repository }}
     name: Check Version
     runs-on: ubuntu-latest
     outputs:
@@ -46,13 +49,14 @@ jobs:
       has_update: ${{ steps.check_version.outputs.has_update }}
       source_repo: ${{ steps.set_source.outputs.source_repo }}
       source_branch: ${{ steps.set_source.outputs.source_branch }}
+      should_build: ${{ steps.check_version.outputs.should_build }}
     steps:
       - name: Set source repository
         id: set_source
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            SOURCE_REPO="${{ github.event.inputs.source_repo }}"
-            SOURCE_BRANCH="${{ github.event.inputs.source_branch }}"
+            SOURCE_REPO="${{ github.event.inputs.source_repo || 'jerrykuku/luci-theme-argon' }}"
+            SOURCE_BRANCH="${{ github.event.inputs.source_branch || 'master' }}"
           else
             SOURCE_REPO="${{ github.repository }}"
             SOURCE_BRANCH="master"
@@ -73,14 +77,32 @@ jobs:
         env:
           url_release: https://api.github.com/repos/${{ github.repository }}/releases/latest
         run: |
-          latest_version=$(grep -oP 'PKG_VERSION:=\K.*' Makefile | sed 's/^/v/')
-          latest_release=$(wget -qO- -t1 -T2 ${{env.url_release}} | awk -F '"' '/tag_name/{print $4}')
-          has_update=$([ "${latest_version}" != "${latest_release}" ] && echo true || echo false)
+          if [ -f "Makefile" ]; then
+            latest_version=$(grep -oP 'PKG_VERSION:=\K.*' Makefile | sed 's/^/v/' || echo "v1.0.0")
+          else
+            latest_version="v1.0.0"
+          fi
+          
+          latest_release=$(wget -qO- -t1 -T2 ${{env.url_release}} 2>/dev/null | awk -F '"' '/tag_name/{print $4}' || echo "")
+          
+          force_compile="${{ github.event.inputs.force_compile }}"
+          
+          if [ "${force_compile}" = "true" ]; then
+            has_update="true"
+            should_build="true"
+            echo "Force compile enabled"
+          else
+            has_update=$([ "${latest_version}" != "${latest_release}" ] && echo true || echo false)
+            should_build="${has_update}"
+          fi
+          
           echo "latest_version=${latest_version}" >> $GITHUB_OUTPUT
           echo "has_update=${has_update}" >> $GITHUB_OUTPUT
+          echo "should_build=${should_build}" >> $GITHUB_OUTPUT
           echo "latest_version: ${latest_version}"
           echo "latest_release: ${latest_release}"
           echo "has_update: ${has_update}"
+          echo "should_build: ${should_build}"
 
       - name: Generate new tag & release
         if: steps.check_version.outputs.has_update == 'true'
@@ -94,7 +116,7 @@ jobs:
   job_build_argon:
     name: Build Argon (master)
     needs: job_check
-    if: needs.job_check.outputs.has_update == 'true'
+    if: needs.job_check.outputs.should_build == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Install packages
@@ -110,57 +132,98 @@ jobs:
         uses: actions/cache@v3
         with:
           path: sdk
-          key: openwrt-sdk-snapshot-x86-64
+          key: openwrt-sdk-24.10.0-x86-64
 
-      - name: Initialization environment
+      - name: Download and setup OpenWrt SDK
         if: steps.cache-sdk.outputs.cache-hit != 'true'
         env:
           url_sdk: https://archive.openwrt.org/releases/24.10.0/targets/x86/64/openwrt-sdk-24.10.0-x86-64_gcc-13.3.0_musl.Linux-x86_64.tar.zst
         run: |
-          wget ${{ env.url_sdk }}
-          file_name=$(echo ${{env.url_sdk}} | awk -F/ '{print $NF}')
-          mkdir sdk && tar --zstd -xvf $file_name -C ./sdk --strip-components=1
-          cd sdk  
+          echo "Downloading OpenWrt SDK..."
+          wget -q ${{ env.url_sdk }} -O openwrt-sdk.tar.zst
+          echo "Extracting SDK..."
+          mkdir -p sdk
+          tar --zstd -xf openwrt-sdk.tar.zst -C ./sdk --strip-components=1
+          rm openwrt-sdk.tar.zst
+
+      - name: Setup feeds and clone source
+        run: |
+          cd sdk
+          echo "Setting up feeds..."
           echo "src-git base https://github.com/openwrt/openwrt.git;main" > feeds.conf
           echo "src-git-full packages https://github.com/openwrt/packages.git;master" >> feeds.conf
           echo "src-git-full luci https://github.com/openwrt/luci.git;master" >> feeds.conf
-          echo "src-git-full routing https://git.openwrt.org/feed/routing.git;master"  >> feeds.conf
-          echo "Cloning from: https://github.com/${{ needs.job_check.outputs.source_repo }}.git (branch: ${{ needs.job_check.outputs.source_branch }})"
-          git clone -b ${{ needs.job_check.outputs.source_branch }} https://github.com/${{ needs.job_check.outputs.source_repo }}.git package/downloads/luci-theme-argon
-          ./scripts/feeds update -a
-          echo "CONFIG_PACKAGE_luci-theme-argon=m" > .config
-          ./scripts/feeds install -d n luci-theme-argon
-          make download -j8
+          echo "src-git-full routing https://git.openwrt.org/feed/routing.git;master" >> feeds.conf
+          
+          echo "Cloning source: https://github.com/${{ needs.job_check.outputs.source_repo }}.git (branch: ${{ needs.job_check.outputs.source_branch }})"
+          git clone -b ${{ needs.job_check.outputs.source_branch }} --depth=1 https://github.com/${{ needs.job_check.outputs.source_repo }}.git package/luci-theme-argon
+          
+          echo "Updating feeds..."
+          ./scripts/feeds update -a > /dev/null 2>&1
+          
+          echo "Installing luci-theme-argon..."
+          ./scripts/feeds install -a -p luci-theme-argon
 
-      - name: Configure Argon (master)
+      - name: Configure build
         run: |
           cd sdk
-          ./scripts/feeds install luci-theme-argon
-          echo "CONFIG_ALL_NONSHARED=n" > .config
-          echo "CONFIG_ALL_KMODS=n" >> .config
-          echo "CONFIG_ALL=n" >> .config
-          echo "CONFIG_AUTOREMOVE=n" >> .config
-          echo "CONFIG_LUCI_LANG_zh_Hans=y" >> .config
-          echo "CONFIG_PACKAGE_luci-theme-argon=m" >> .config
+          echo "Configuring build..."
+          cat > .config << EOF
+          CONFIG_ALL_NONSHARED=n
+          CONFIG_ALL_KMODS=n
+          CONFIG_ALL=n
+          CONFIG_AUTOREMOVE=n
+          CONFIG_LUCI_LANG_zh_Hans=y
+          CONFIG_PACKAGE_luci-theme-argon=m
+          EOF
+          
           make defconfig
+          echo "Configuration completed"
 
-      - name: Compile Argon (master)
+      - name: Download dependencies
+        run: |
+          cd sdk
+          echo "Downloading dependencies..."
+          make download -j8 V=s
+
+      - name: Compile Argon theme
         id: compile
         run: |
           cd sdk
-          echo "make package/luci-theme-argon/{clean,compile} -j$(nproc)"
-          make package/luci-theme-argon/{clean,compile} -j$(nproc)
-          mv bin/packages/x86_64/base/ ../
-          rm .config .config.old
+          echo "Starting compilation..."
+          echo "make package/luci-theme-argon/{clean,compile} -j$(nproc) V=s"
+          make package/luci-theme-argon/clean V=s
+          make package/luci-theme-argon/compile -j$(nproc) V=s
+          
+          echo "Compilation completed, checking output..."
+          find bin/ -name "*.ipk" -ls
+          
+          if [ -d "bin/packages" ]; then
+            mkdir -p ../release
+            find bin/packages -name "luci-theme*.ipk" -exec cp {} ../release/ \;
+            echo "Files copied to release directory:"
+            ls -la ../release/
+          else
+            echo "No packages directory found!"
+            exit 1
+          fi
+          
           cd ..
           echo "status=success" >> $GITHUB_OUTPUT
-          echo "FIRMWARE=$PWD" >> $GITHUB_ENV
+          echo "FIRMWARE=$PWD/release" >> $GITHUB_ENV
 
-      - name: Upload Argon (master) ipks to release
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        if: steps.compile.outputs.status == 'success'
+        with:
+          name: luci-theme-argon-ipk
+          path: release/*.ipk
+
+      - name: Upload to release
         uses: softprops/action-gh-release@v1
         if: steps.compile.outputs.status == 'success'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{needs.job_check.outputs.argon_version}}
-          files: ${{ env.FIRMWARE }}/base/luci-theme*.*
+          files: ${{ env.FIRMWARE }}/*.ipk
