@@ -153,11 +153,15 @@
 						<div class="flex1">
 							<a class="showSide"></a>
 	<tr>
-             <td><a href='/cgi-bin/luci/admin/network/network'><img src="{{ media }}/navbar/interface.png" width="35" height="35"></a></td>
-             <td><a href='/cgi-bin/luci/admin/system/tinyfm'><img src="{{ media }}/navbar/tinyfm.png" width="35" height="35"></a></td>
-             <td><a href='/cgi-bin/luci/admin/services/droidnet'><img src="{{ media }}/navbar/droidnet.png" width="35" height="35"></a></td>
-             <td><a href='/cgi-bin/luci/admin/modem/3ginfo-lite'><img src="{{ media }}/navbar/modem.png" width="35" height="35"></a></td>
-      </tr>
+    <td><a href='/cgi-bin/luci/admin/network/network'><img src="{{ media }}/navbar/interface.png" width="35" height="35"></a></td>
+    <td><a href='/cgi-bin/luci/admin/system/tinyfm'><img src="{{ media }}/navbar/tinyfm.png" width="35" height="35"></a></td>
+    <!-- <td><a href='/cgi-bin/luci/admin/services/openclash'><img src="{{ media }}/navbar/openclash.png" width="35" height="35"></a></td> -->
+    <!-- <td><a href='/cgi-bin/luci/admin/services/nikki'><img src="{{ media }}/navbar/nikki.png" width="35" height="35"></a></td> -->
+    <!-- <td><a href='/cgi-bin/luci/admin/services/passwall'><img src="{{ media }}/navbar/passwall.png" width="35" height="35"></a></td> -->
+    <td><a href='/cgi-bin/luci/admin/services/droidnet'><img src="{{ media }}/navbar/droidnet.png" width="35" height="35"></a></td>
+    <td><a href='/cgi-bin/luci/admin/modem/3ginfo-lite'><img src="{{ media }}/navbar/modem.png" width="35" height="35"></a></td>
+    <td><a href='/cgi-bin/luci/admin/status/netmonitor'><img src="{{ media }}/navbar/netmon.png" width="35" height="35"></a></td>
+</tr>
 						</div>
 						<div class="status" id="indicators"></div>
 					</div>
@@ -193,7 +197,8 @@
 <nav id='menu'>
     <ul>
         <li><a href='/cgi-bin/luci/admin/services/ttyd'>Terminal</a></li>
-        <li><a href='/cgi-bin/luci/admin/status/netmonitor'>Netmonitor</a></li>
+        <li><a href='http://192.168.8.1/'>Hilink</a></li>
+        <li><a href='http://192.168.1.2/'>Router</a></li>
         <li><a href='#' target='_blank'>Zash</a></li>
         <li><a href='#' target='_blank'>Yacd</a></li>
     </ul>
