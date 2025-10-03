@@ -18,6 +18,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="referrer" content="no-referrer">
     <title>XIDZs-WRT</title>
     <link rel="stylesheet" href="{{ media }}/css/login.css">
     <link rel="shortcut icon" href="{{ media }}/favicon.ico">
@@ -30,7 +32,7 @@
     <form method="post" action="{{ entityencode(REQUEST_URI) }}">
         {% if (fuser): %}
         <div class="alert-message" id="a">
-            <p>{{ _("Username Atau Sandi Salah") }}<br>{{ _("Masukan Dengan Benar") }}</p>
+            Invalid username and/or password! Please try again.
         </div>
         {% endif %}
 
@@ -42,11 +44,11 @@
                 </div>
 
                 <div class="input_group">
-                    <input class="input_text" type="text" name="luci_username" placeholder="Username" value="{{ duser }}">
+                    <input class="input_text" type="text" name="luci_username" placeholder="Username" value="{{ duser }}" required autofocus>
                 </div>
                 
                 <div class="input_group">
-                    <input class="input_text" type="password" name="luci_password" placeholder="Password">
+                    <input class="input_text" type="password" name="luci_password" placeholder="Password" required>
                 </div>
 
                 <input type="submit" value="LOGIN">
@@ -55,20 +57,53 @@
     </form>
 
     <script>
+        // Prevent zoom
         document.addEventListener('wheel',e=>e.ctrlKey&&e.preventDefault(),{passive:!1});
         document.addEventListener('keydown',e=>(e.ctrlKey&&(e.key==='+'||e.key==='-'||e.key==='0'))&&e.preventDefault());
 
-        const T=['dark','light','rose','neon','wave','dual'],B=document.getElementById('b'),D=document.body;
-        let C=localStorage.theme||'dark';D.className=C;B.textContent=C.toUpperCase();
-        B.onclick=()=>{C=T[(T.indexOf(C)+1)%6];D.className=C;B.textContent=C.toUpperCase();localStorage.theme=C};
-        const U=()=>{const N=new Date();document.getElementById('t').textContent=N.toLocaleTimeString('id');if(!document.getElementById('d').textContent)document.getElementById('d').textContent=N.toLocaleDateString('id',{weekday:'long',day:'numeric',month:'short',year:'numeric'})};
-        U();setInterval(U,1000);
-        const A=document.getElementById('a');if(A)setTimeout(()=>A.classList.add('fade-out'),3000);
-        setTimeout(()=>document.getElementsByName('luci_password')[0]?.focus(),500);
+        // Theme switcher (5 tema: dark, light, neon, pulse, dual)
+        const T=['dark','light','neon','pulse','dual'],B=document.getElementById('b'),D=document.body;
+        let C=localStorage.theme||'dark';
+        D.className=C;
+        B.textContent=C.toUpperCase();
+        B.onclick=()=>{
+            C=T[(T.indexOf(C)+1)%5];
+            D.className=C;
+            B.textContent=C.toUpperCase();
+            localStorage.theme=C
+        };
+        
+        // Clock update
+        const U=()=>{
+            const N=new Date();
+            const tEl=document.getElementById('t');
+            const dEl=document.getElementById('d');
+            if(tEl)tEl.textContent=N.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+            if(dEl&&!dEl.textContent)dEl.textContent=N.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'short',year:'numeric'})
+        };
+        U();
+        setInterval(U,1000);
+        
+        // Auto hide alert message
+        const A=document.getElementById('a');
+        if(A){
+            setTimeout(()=>{
+                A.classList.add('fade-out');
+                setTimeout(()=>A.remove(),300)
+            },3000)
+        }
     </script>
 
     {% if (has_https): %}
-    <script>if (document.location.protocol !== 'https:') { const url = `https://${window.location.hostname}:{{ https_port }}${window.location.hostname}:{{ https_port }}/{{ resource }}/icons/loading.gif?${Math.random()}`; setTimeout(() => img.src = '', 240); }</script>
+    <script>
+        if(document.location.protocol!=='https:'){
+            const img=new Image();
+            const url=`https://${window.location.hostname}:{{ https_port }}{{ resource }}/icons/loading.gif?${Math.random()}`;
+            img.onload=()=>window.location.href=`https://${window.location.hostname}:{{ https_port }}${window.location.pathname}`;
+            img.src=url;
+            setTimeout(()=>img.src='',240)
+        }
+    </script>
     {% endif %}
 </body>
 </html>
