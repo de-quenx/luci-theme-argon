@@ -67,6 +67,9 @@ jobs:
     name: Release ${{ matrix.arch }}-${{ matrix.branch }}
     needs: get-version
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: write
     continue-on-error: false
     strategy:
       fail-fast: false
@@ -106,21 +109,16 @@ jobs:
 
       - name: Prepare release artifacts
         run: |
-          # Create release artifacts directory
           mkdir -p ${{ github.workspace }}/release-artifacts
 
-          # Handle different file extensions based on branch
           if [[ "${{ matrix.branch }}" == "SNAPSHOT" ]]; then
-            # For SNAPSHOT branch - copy APK files
             find ${{ github.workspace }}/artifacts/bin/packages -name "${{ env.PACKAGE_NAME }}*.apk" -exec cp {} ${{ github.workspace }}/release-artifacts/ \; || true
             find ${{ github.workspace }}/artifacts/bin/targets -name "${{ env.PACKAGE_NAME }}*.apk" -exec cp {} ${{ github.workspace }}/release-artifacts/ \; || true
           else
-            # For other branches - copy IPK files
             find ${{ github.workspace }}/artifacts/bin/packages -name "${{ env.PACKAGE_NAME }}*.ipk" -exec cp {} ${{ github.workspace }}/release-artifacts/ \; || true
             find ${{ github.workspace }}/artifacts/bin/targets -name "${{ env.PACKAGE_NAME }}*.ipk" -exec cp {} ${{ github.workspace }}/release-artifacts/ \; || true
           fi
 
-          # Debug: list contents
           echo "Contents of release-artifacts directory:"
           ls -la ${{ github.workspace }}/release-artifacts/
 
@@ -130,3 +128,39 @@ jobs:
           tag_name: "v${{ needs.get-version.outputs.version }}"
           files: |
             ${{ github.workspace }}/release-artifacts/*
+
+      - name: Clean cache after successful build
+        if: success()
+        continue-on-error: true
+        uses: actions/github-script@v7
+        with:
+          script: |
+            console.log('Starting cache cleanup...');
+            
+            const caches = await github.rest.actions.getActionsCacheList({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+            
+            if (caches.data.total_count === 0) {
+              console.log('No caches found');
+              return;
+            }
+            
+            console.log('Found ' + caches.data.total_count + ' cache(s) to delete');
+            
+            for (const cache of caches.data.actions_caches) {
+              console.log('Deleting: ' + cache.key + ' (' + (cache.size_in_bytes / 1024 / 1024).toFixed(2) + ' MB)');
+              try {
+                await github.rest.actions.deleteActionsCacheById({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  cache_id: cache.id,
+                });
+                console.log('Successfully deleted: ' + cache.key);
+              } catch (error) {
+                console.log('Failed to delete ' + cache.key + ': ' + error.message);
+              }
+            }
+            
+            console.log('Cache cleanup completed!');
