@@ -155,12 +155,15 @@
 	<tr>
     <td><a href='/cgi-bin/luci/admin/network/network'><img src="{{ media }}/navbar/interface.png" width="35" height="35"></a></td>
     <td><a href='/cgi-bin/luci/admin/system/tinyfm'><img src="{{ media }}/navbar/tinyfm.png" width="35" height="35"></a></td>
-    <!-- <td><a href='/cgi-bin/luci/admin/services/openclash'><img src="{{ media }}/navbar/openclash.png" width="35" height="35"></a></td> -->
-    <!-- <td><a href='/cgi-bin/luci/admin/services/nikki'><img src="{{ media }}/navbar/nikki.png" width="35" height="35"></a></td> -->
-    <!-- <td><a href='/cgi-bin/luci/admin/services/passwall'><img src="{{ media }}/navbar/passwall.png" width="35" height="35"></a></td> -->
     <td><a href='/cgi-bin/luci/admin/services/droidnet'><img src="{{ media }}/navbar/droidnet.png" width="35" height="35"></a></td>
     <td><a href='/cgi-bin/luci/admin/modem/3ginfo-lite'><img src="{{ media }}/navbar/modem.png" width="35" height="35"></a></td>
     <td><a href='/cgi-bin/luci/admin/status/netmonitor'><img src="{{ media }}/navbar/netmon.png" width="35" height="35"></a></td>
+    <!-- <td><a href='/cgi-bin/luci/admin/services/openclash'><img src="{{ media }}/navbar/openclash.png" width="35" height="35"></a></td> -->
+    <!-- <td><a href='/cgi-bin/luci/admin/services/nikki'><img src="{{ media }}/navbar/nikki.png" width="35" height="35"></a></td> -->
+    <!-- <td><a href='/cgi-bin/luci/admin/services/passwall'><img src="{{ media }}/navbar/passwall.png" width="35" height="35"></a></td> -->
+    <!-- <td><a href='/cgi-bin/luci/admin/modem/rakitan'><img src="{{ media }}/navbar/rakitanmanager.png" width="35" height="35"></a></td> -->
+    <!-- <td><a href='/cgi-bin/luci/admin/services/neko'><img src="{{ media }}/navbar/neko.png" width="35" height="35"></a></td> -->
+    <!-- <td><a href='/cgi-bin/luci/admin/services/adguardhome'><img src="{{ media }}/navbar/adguard.png" width="35" height="35"></a></td> -->
 </tr>
 						</div>
 						<div class="status" id="indicators"></div>
@@ -193,76 +196,43 @@
     text-decoration: underline;
 }
 </style>
-
 <nav id='menu'>
     <ul>
         <li><a href='/cgi-bin/luci/admin/services/ttyd'>Terminal</a></li>
         <li><a href='http://192.168.8.1/'>Hilink</a></li>
         <li><a href='http://192.168.1.2/'>Router</a></li>
-        <li><a href='#' target='_blank'>Zash</a></li>
-        <li><a href='#' target='_blank'>Yacd</a></li>
+        <li><a id='zash' href='#' target='_blank'>Zash</a></li>
+        <li><a id='yacd' href='#' target='_blank'>Yacd</a></li>
     </ul>
 </nav>
 <script>
-  (function(){
-    'use strict';
-
+  (async function(){
     const { hostname } = window.location;
-    const baseUrl = `http://${hostname}:9090`;
-
-    const elements = {
-      zash: document.getElementById('zash'),
-      yacd: document.getElementById('yacd')
-    };
-
-    if(!elements.zash || !elements.yacd) return;
-
-    const urls = {
-      nikki: `${baseUrl}/ui/Nikki/`,
-      zashboard: `${baseUrl}/ui/zashboard/`,
-      yacd: `${baseUrl}/ui/yacd/`
-    };
-
-    elements.yacd.href = urls.yacd;
-
-    function checkFavicon(url) {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => resolve(url);
-        img.onerror = () => reject(url);
-        img.src = `${url}favicon.ico?${Date.now()}`;
-      });
-    }
-
-    function setZash(url, color, text) {
-      elements.zash.href = url;
-      elements.zash.style.color = color;
-      elements.zash.textContent = text;
-    }
-
-    async function detectUI() {
-      try {
-        const nikkiUrl = await checkFavicon(urls.nikki);
-        setZash(`${nikkiUrl}?host=${hostname}&hostname=${hostname}&port=9090`, '#00ff00', 'Nikki');
-        console.log('Nikki detected');
-      }
-      catch {
-        try {
-          const zashUrl = await checkFavicon(urls.zashboard);
-          setZash(zashUrl, '#00ff00', 'Openclash');
-          console.log('Zashboard detected');
-        }
-        catch {
-          setZash(urls.zashboard, '#fff', 'Zash');
-          console.log('No Nikki or Zashboard detected; fallback to default');
-        }
-      }
-    }
-
-    if(document.readyState === 'loading'){
-      document.addEventListener('DOMContentLoaded', detectUI);
+    const base = `http://${hostname}:9090`;
+    
+    const zash = document.getElementById('zash');
+    const yacd = document.getElementById('yacd');
+    
+    if(!zash || !yacd) return;
+    
+    yacd.href = `${base}/ui/yacd/`;
+    
+    const check = url => fetch(url, { method: 'HEAD' }).then(r => r.ok).catch(() => false);
+    
+    const nikkiOk = await check(`${base}/ui/Nikki/`);
+    const zashOk = await check(`${base}/ui/zashboard/`);
+    
+    if(nikkiOk) {
+      zash.href = `${base}/ui/Nikki/?host=${hostname}&port=9090`;
+      zash.textContent = 'Nikki';
+      zash.style.color = '#0f0';
+    } else if(zashOk) {
+      zash.href = `${base}/ui/zashboard/`;
+      zash.textContent = 'Openclash';
+      zash.style.color = '#0f0';
     } else {
-      detectUI();
+      zash.href = `${base}/ui/zashboard/`;
+      zash.textContent = 'Zash';
     }
   })();
 </script>
