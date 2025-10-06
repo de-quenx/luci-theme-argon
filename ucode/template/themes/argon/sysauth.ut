@@ -61,13 +61,13 @@
         document.addEventListener('wheel',e=>e.ctrlKey&&e.preventDefault(),{passive:!1});
         document.addEventListener('keydown',e=>(e.ctrlKey&&(e.key==='+'||e.key==='-'||e.key==='0'))&&e.preventDefault());
 
-        // Theme switcher (5 tema: dark, light, neon, pulse, dual)
-        const T=['dark','light','neon','pulse','dual'],B=document.getElementById('b'),D=document.body;
+        // Theme switcher (6 tema: dark, light, neon, pulse, dual, glass)
+        const T=['dark','light','neon','pulse','dual','glass'],B=document.getElementById('b'),D=document.body;
         let C=localStorage.theme||'dark';
         D.className=C;
         B.textContent=C.toUpperCase();
         B.onclick=()=>{
-            C=T[(T.indexOf(C)+1)%5];
+            C=T[(T.indexOf(C)+1)%6];
             D.className=C;
             B.textContent=C.toUpperCase();
             localStorage.theme=C
