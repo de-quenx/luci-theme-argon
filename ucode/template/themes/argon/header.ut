@@ -93,12 +93,12 @@
 	<link rel="stylesheet" href="{{ media }}/css/cascade.css?v=2.4.3">
 	<style title="text/css">
 		{% if (mode == 'normal'): %}
-			@media (prefers-color-scheme: dark) {
-				{{ dark_css }}
-			}
+		@media (prefers-color-scheme: dark) {
+			{{ dark_css }}
+		}
 		{% endif %}
 		{% if (mode == 'dark'): %}
-			{{ dark_css }}
+		{{ dark_css }}
 		{% endif -%}
 		{% if (access('/etc/config/argon')): %}
 		:root {
@@ -125,9 +125,7 @@
 	<script src="{{ resource }}/luci.js?v={{ version.luciversion }}"></script>
 </head>
 
-<body
-	class="lang_{{ dispatcher.lang }} {{ node?.title ? ` - ${striptags(node.title)}` : '' }} {% if (ctx.authsession): %}logged-in{% endif %}"
-	data-page="{{ entityencode(join('-', ctx.request_path), true) }}">
+<body class="lang_{{ dispatcher.lang }} {{ node?.title ? ` - ${striptags(node.title)}` : '' }} {% if (ctx.authsession): %}logged-in{% endif %}" data-page="{{ entityencode(join('-', ctx.request_path), true) }}">
 
 	<div class="main">
 		<div class="main-left" id="mainmenu" style="display:none">
@@ -135,8 +133,7 @@
 				<a class="brand" href="#">{{ hostname }}</a>
 				<div class="ml-auto">
 					<!-- Sidenav toggler -->
-					<div class="sidenav-toggler d-none d-xl-block active" data-action="sidenav-unpin"
-						data-target="#sidenav-main">
+					<div class="sidenav-toggler d-none d-xl-block active" data-action="sidenav-unpin" data-target="#sidenav-main">
 						<div class="sidenav-toggler-inner">
 							<i class="sidenav-toggler-line"></i>
 							<i class="sidenav-toggler-line"></i>
@@ -173,7 +170,7 @@
 					#menu {
 						position: relative;
 						top: -8px;
-						left: 90px;
+						left: 80px;
 						margin: 0;
 						padding: -5px 0;
 					}
@@ -206,35 +203,45 @@
 					</ul>
 				</nav>
 				<script>
-					(async function(){
-						const { hostname } = window.location;
-						const base = `http://${hostname}:9090`;
-						
+				(function(){
+					'use strict';
+					
+					function init() {
 						const zash = document.getElementById('zash');
 						const yacd = document.getElementById('yacd');
 						
-						if(!zash || !yacd) return;
+						if (!zash || !yacd) return setTimeout(init, 100);
+						
+						const { hostname } = window.location;
+						const base = `http://${hostname}:9090`;
 						
 						yacd.href = `${base}/ui/yacd/`;
 						
-						const check = url => fetch(url, { method: 'HEAD' }).then(r => r.ok).catch(() => false);
-						
-						const nikkiOk = await check(`${base}/ui/Nikki/`);
-						const zashOk = await check(`${base}/ui/zashboard/`);
-						
-						if(nikkiOk) {
-							zash.href = `${base}/ui/Nikki/?host=${hostname}&port=9090`;
-							zash.textContent = 'Nikki';
-							zash.style.color = '#0f0';
-						} else if(zashOk) {
-							zash.href = `${base}/ui/zashboard/`;
-							zash.textContent = 'Openclash';
-							zash.style.color = '#0f0';
-						} else {
-							zash.href = `${base}/ui/zashboard/`;
-							zash.textContent = 'Zash';
+						function check(url) {
+							return new Promise((resolve, reject) => {
+								const img = new Image();
+								img.onload = () => resolve(url);
+								img.onerror = reject;
+								img.src = `${url}favicon.ico?${Date.now()}`;
+							});
 						}
-					})();
+						
+						function set(url, color, text) {
+							zash.href = url;
+							zash.style.color = color;
+							zash.textContent = text;
+						}
+						
+						check(`${base}/ui/Nikki/`)
+							.then(url => set(`${url}?host=${hostname}&port=9090`, '#0f0', 'Nikki'))
+							.catch(() => check(`${base}/ui/zashboard/`)
+								.then(url => set(url, '#0f0', 'Clash'))
+								.catch(() => set(`${base}/ui/zashboard/`, '#fff', 'Zash')));
+					}
+					
+					document.readyState === 'loading' ? 
+						document.addEventListener('DOMContentLoaded', init) : init();
+				})();
 				</script>
 			</header>
 			<div class="darkMask"></div>
