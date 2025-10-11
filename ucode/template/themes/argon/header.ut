@@ -27,12 +27,10 @@
 
 	let cfg = cursor();
 
-	//send as HTML5
 	http.prepare_content('text/html; charset=UTF-8');
 
 	srand(+substr(reverse(time() + ""), 0, 8));
 
-	//Custom settings
 	let mode = 'normal';
 	let bar_color = '#3f5582';
 	let primary, dark_primary, blur_radius, blur_radius_dark, blur_opacity, blur_opacity_dark;
@@ -57,29 +55,24 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<title>{{ hostname }}{{ node?.title ? ` - ${striptags(node.title)}` : '' }} - LuCI</title>
 
-	<!-- SEO and Description -->
 	<meta name="robots" content="noindex, nofollow">
 
-	<!-- Security -->
 	<meta http-equiv="X-Content-Type-Options" content="nosniff">
 	<meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
 	<meta http-equiv="X-XSS-Protection" content="1; mode=block">
 	<meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
 
-	<!-- Mobile and PWA -->
 	<meta name="format-detection" content="telephone=no, email=no">
 	<meta name="mobile-web-app-capable" content="yes">
 	<meta name="apple-mobile-web-app-capable" content="yes">
 	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 	<meta name="apple-mobile-web-app-title" content="{{ hostname }} - LuCI">
 
-	<!-- Theme and Colors -->
 	<meta name="theme-color" content="{{ bar_color }}">
 	<meta name="msapplication-TileColor" content="{{ bar_color }}">
 	<meta name="msapplication-TileImage" content="{{ media }}/icon/ms-icon-144x144.png">
 	<meta name="application-name" content="{{ hostname }} - LuCI">
 
-	<!-- Icons and Manifest -->
 	<link rel="icon" type="image/x-icon" href="{{ media }}/favicon.ico">
 	<link rel="icon" type="image/png" sizes="16x16" href="{{ media }}/icon/favicon-16x16.png">
 	<link rel="icon" type="image/png" sizes="32x32" href="{{ media }}/icon/favicon-32x32.png">
@@ -111,7 +104,6 @@
 		}
 		{% endif -%}
 	</style>
-	<!-- Stylesheets -->
 	{% if (node?.css): %}
 	<link rel="stylesheet" href="{{ resource }}/{{ node.css}}">
 	{% endif -%}
@@ -132,7 +124,6 @@
 			<div class="sidenav-header d-flex align-items-center">
 				<a class="brand" href="#">{{ hostname }}</a>
 				<div class="ml-auto">
-					<!-- Sidenav toggler -->
 					<div class="sidenav-toggler d-none d-xl-block active" data-action="sidenav-unpin" data-target="#sidenav-main">
 						<div class="sidenav-toggler-inner">
 							<i class="sidenav-toggler-line"></i>
@@ -155,9 +146,9 @@
 								<td><a href='/cgi-bin/luci/admin/services/droidnet'><img src="{{ media }}/navbar/droidnet.png" width="35" height="35"></a></td>
 								<td><a href='/cgi-bin/luci/admin/modem/3ginfo-lite'><img src="{{ media }}/navbar/modem.png" width="35" height="35"></a></td>
 								<td><a href='/cgi-bin/luci/admin/status/netmonitor'><img src="{{ media }}/navbar/netmon.png" width="35" height="35"></a></td>
-								<!-- <td><a href='/cgi-bin/luci/admin/services/openclash'><img src="{{ media }}/navbar/openclash.png" width="35" height="35"></a></td> -->
-								<!-- <td><a href='/cgi-bin/luci/admin/services/nikki'><img src="{{ media }}/navbar/nikki.png" width="35" height="35"></a></td> -->
-								<!-- <td><a href='/cgi-bin/luci/admin/services/passwall'><img src="{{ media }}/navbar/passwall.png" width="35" height="35"></a></td> -->
+								<td><a href='/cgi-bin/luci/admin/services/openclash'><img src="{{ media }}/navbar/openclash.png" width="35" height="35"></a></td>
+								<td><a href='/cgi-bin/luci/admin/services/nikki'><img src="{{ media }}/navbar/nikki.png" width="35" height="35"></a></td>
+								<td><a href='/cgi-bin/luci/admin/services/passwall'><img src="{{ media }}/navbar/passwall.png" width="35" height="35"></a></td>
 								<!-- <td><a href='/cgi-bin/luci/admin/modem/rakitan'><img src="{{ media }}/navbar/rakitanmanager.png" width="35" height="35"></a></td> -->
 								<!-- <td><a href='/cgi-bin/luci/admin/services/neko'><img src="{{ media }}/navbar/neko.png" width="35" height="35"></a></td> -->
 								<!-- <td><a href='/cgi-bin/luci/admin/services/adguardhome'><img src="{{ media }}/navbar/adguard.png" width="35" height="35"></a></td> -->

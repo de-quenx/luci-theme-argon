@@ -5,6 +5,7 @@
 	let uci = cursor();
 	let https_key = uci.get("uhttpd", "main", "key");
 	let https_port = uci.get("uhttpd", "main", "listen_https");
+	let hostname = uci.get("system", "@system[0]", "hostname") || "XIDZs-WRT";
 	
 	if (type(https_port) == "array" && length(https_port) > 0)
 		https_port = https_port[0];
@@ -20,7 +21,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
 	<meta name="robots" content="noindex, nofollow">
 	<meta name="referrer" content="no-referrer">
-	<title>XIDZs-WRT</title>
+	<title>{{ hostname }}</title>
 	<link rel="stylesheet" href="{{ media }}/css/login.css">
 	<link rel="shortcut icon" href="{{ media }}/favicon.ico">
 </head>
@@ -38,7 +39,7 @@
 
 		<div class="login_form_container">
 			<div class="login_form">
-				<h2>XIDZs-WRT</h2>
+				<h2>{{ hostname }}</h2>
 				<div class="date-time">
 					<span id="d"></span> | <span id="t"></span>
 				</div>
@@ -52,6 +53,8 @@
 				</div>
 
 				<input type="submit" value="LOGIN">
+				
+				<div class="footer">XIDZs-WRT © 2025</div>
 			</div>
 		</div>
 	</form>
@@ -101,7 +104,7 @@
 			const url=`https://${window.location.hostname}:{{ https_port }}{{ resource }}/icons/loading.gif?${Math.random()}`;
 			img.onload=()=>window.location.href=`https://${window.location.hostname}:{{ https_port }}${window.location.pathname}`;
 			img.src=url;
-			setTimeout(()=>img.src='',240)
+			setTimeout(()=>img.src='',180)
 		}
 	</script>
 	{% endif %}
