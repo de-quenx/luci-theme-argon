@@ -1,12 +1,12 @@
 document.addEventListener('wheel',e=>e.ctrlKey&&e.preventDefault(),{passive:!1});
 document.addEventListener('keydown',e=>(e.ctrlKey&&(e.key==='+'||e.key==='-'||e.key==='0'))&&e.preventDefault());
 
-const T=['dark','light','neon','pulse','dual','glass'],B=document.getElementById('b'),D=document.body;
+const T=['dark','light','neon','pulse','spectrum','matrix','gradien','glass'],B=document.getElementById('b'),D=document.body;
 let C=localStorage.theme||'dark';
 D.className=C;
 B.textContent=C.toUpperCase();
 B.onclick=()=>{
-	C=T[(T.indexOf(C)+1)%6];
+	C=T[(T.indexOf(C)+1)%8];
 	D.className=C;
 	B.textContent=C.toUpperCase();
 	localStorage.theme=C
