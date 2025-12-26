@@ -1,16 +1,70 @@
 document.addEventListener('wheel',e=>e.ctrlKey&&e.preventDefault(),{passive:!1});
 document.addEventListener('keydown',e=>(e.ctrlKey&&(e.key==='+'||e.key==='-'||e.key==='0'))&&e.preventDefault());
 
-const T=['dark','light','neon','pulse','curve','matrix','gradien','glass','ocean'],B=document.getElementById('b'),D=document.body;
-let C=localStorage.theme||'dark';
+const T=['liquid','light','glass','gradien','dark','neon','ocean','matrix','pulse','curve'],B=document.getElementById('b'),D=document.body;
+let C=localStorage.theme||'liquid';
+let TC=parseInt(localStorage.themeCount)||0;
+let TT=parseInt(localStorage.themeTime)||0;
 D.className=C;
 B.textContent=C.toUpperCase();
+
+function checkCooldown(){
+	const now=Date.now();
+	if(now-TT>=120000){
+		TC=0;
+		TT=now;
+		localStorage.themeCount=TC;
+		localStorage.themeTime=TT;
+	}
+	return TC>=4;
+}
+
+function pauseLiquid(){
+	const container=document.querySelector('.login_form_container');
+	const form=document.querySelector('.login_form');
+	if(container)container.classList.add('liquid-paused');
+	if(form)form.classList.add('liquid-paused');
+}
+
+function resumeLiquid(){
+	const container=document.querySelector('.login_form_container');
+	const form=document.querySelector('.login_form');
+	if(container)container.classList.remove('liquid-paused');
+	if(form)form.classList.remove('liquid-paused');
+}
+
+function clearAllPause(){
+	const container=document.querySelector('.login_form_container');
+	const form=document.querySelector('.login_form');
+	if(container)container.classList.remove('liquid-paused');
+	if(form)form.classList.remove('liquid-paused');
+}
+
 B.onclick=()=>{
-	C=T[(T.indexOf(C)+1)%9];
+	if(checkCooldown())return;
+	if(D.classList.contains('liquid')){
+		pauseLiquid();
+	}
+	C=T[(T.indexOf(C)+1)%T.length];
 	D.className=C;
 	B.textContent=C.toUpperCase();
-	localStorage.theme=C
+	localStorage.theme=C;
+	TC++;
+	if(TC===1)TT=Date.now();
+	localStorage.themeCount=TC;
+	localStorage.themeTime=TT;
+	if(C==='liquid'){
+		setTimeout(resumeLiquid,500);
+	}else{
+		clearAllPause();
+	}
 };
+
+if(C==='liquid'){
+	setTimeout(()=>{
+		resumeLiquid();
+	},1000);
+}
 
 function toHijri(date) {
 	const gYear = date.getFullYear();
