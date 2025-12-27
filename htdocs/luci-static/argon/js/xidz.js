@@ -10,13 +10,13 @@ B.textContent=C.toUpperCase();
 
 function checkCooldown(){
 	const now=Date.now();
-	if(now-TT>=120000){
+	if(now-TT>=60000){
 		TC=0;
 		TT=now;
 		localStorage.themeCount=TC;
 		localStorage.themeTime=TT;
 	}
-	return TC>=4;
+	return TC>=3;
 }
 
 function pauseLiquid(){
