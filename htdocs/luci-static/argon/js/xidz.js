@@ -1,7 +1,39 @@
 document.addEventListener('wheel',e=>e.ctrlKey&&e.preventDefault(),{passive:!1});
 document.addEventListener('keydown',e=>(e.ctrlKey&&(e.key==='+'||e.key==='-'||e.key==='0'))&&e.preventDefault());
+document.addEventListener('touchstart',e=>e.touches.length>1&&e.preventDefault(),{passive:!1});
+document.addEventListener('touchmove',e=>e.touches.length>1&&e.preventDefault(),{passive:!1});
+document.addEventListener('gesturestart',e=>e.preventDefault());
+document.addEventListener('gesturechange',e=>e.preventDefault());
+document.addEventListener('gestureend',e=>e.preventDefault());
 
-const T=['liquid','light','glass','gradien','dark','neon','ocean','matrix','pulse','curve'],B=document.getElementById('b'),D=document.body;
+let lastTouchEnd=0;
+document.addEventListener('touchend',e=>{
+	const now=Date.now();
+	if(now-lastTouchEnd<=300){
+		e.preventDefault();
+	}
+	lastTouchEnd=now;
+});
+
+document.addEventListener('dblclick',e=>e.preventDefault());
+
+const meta=document.createElement('meta');
+meta.name='viewport';
+meta.content='width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no';
+document.head.appendChild(meta);
+
+document.body.style.cssText+=`
+	-webkit-user-select:none;
+	-moz-user-select:none;
+	-ms-user-select:none;
+	user-select:none;
+	-webkit-touch-callout:none;
+	-webkit-tap-highlight-color:transparent;
+	overscroll-behavior:none;
+	touch-action:pan-y;
+`;
+
+const T=['liquid','light','glass','gradien','dark','neon','ocean','curve','matrix','pulse'],B=document.getElementById('b'),D=document.body;
 let C=localStorage.theme||'liquid';
 let TC=parseInt(localStorage.themeCount)||0;
 let TT=parseInt(localStorage.themeTime)||0;
@@ -10,13 +42,13 @@ B.textContent=C.toUpperCase();
 
 function checkCooldown(){
 	const now=Date.now();
-	if(now-TT>=60000){
+	if(now-TT>=120000){
 		TC=0;
 		TT=now;
 		localStorage.themeCount=TC;
 		localStorage.themeTime=TT;
 	}
-	return TC>=3;
+	return TC>=5;
 }
 
 function pauseLiquid(){
