@@ -42,13 +42,13 @@ B.textContent=C.toUpperCase();
 
 function checkCooldown(){
 	const now=Date.now();
-	if(now-TT>=120000){
+	if(now-TT>=300000){
 		TC=0;
 		TT=now;
 		localStorage.themeCount=TC;
 		localStorage.themeTime=TT;
 	}
-	return TC>=5;
+	return TC>=10;
 }
 
 function pauseLiquid(){
