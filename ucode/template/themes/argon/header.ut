@@ -1,21 +1,3 @@
-{#
-	Argon is a clean HTML5 theme for LuCI. It is based on luci-theme-material Argon Template
-
-	luci-theme-argon
-	Copyright 2020 Jerrykuku <jerrykuku@qq.com>
-
-	Have a bug? Please create an issue here on GitHub!
-	https://github.com/jerrykuku/luci-theme-argon/issues
-
-	luci-theme-material:
-	Copyright 2015 Lutty Yang <lutty@wcan.in>
-
-	Argon Theme
-	https://demos.creative-tim.com/argon-dashboard/index.html
-
-	Licensed to the public under the Apache License 2.0
--#}
-
 {%
 	import { readfile, access } from 'fs';
 	import { cursor } from 'uci';
@@ -45,34 +27,27 @@
 		mode = cfg.get_first('argon', 'global', 'mode');
 		bar_color = (mode == 'dark') ? dark_primary : primary;
 	}
-
 -%}
 <!DOCTYPE html>
 <html lang="{{ dispatcher.lang }}">
-
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<title>{{ hostname }}{{ node?.title ? ` - ${striptags(node.title)}` : '' }} - LuCI</title>
-
 	<meta name="robots" content="noindex, nofollow">
-
 	<meta http-equiv="X-Content-Type-Options" content="nosniff">
 	<meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
 	<meta http-equiv="X-XSS-Protection" content="1; mode=block">
 	<meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
-
 	<meta name="format-detection" content="telephone=no, email=no">
 	<meta name="mobile-web-app-capable" content="yes">
 	<meta name="apple-mobile-web-app-capable" content="yes">
 	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 	<meta name="apple-mobile-web-app-title" content="{{ hostname }} - LuCI">
-
 	<meta name="theme-color" content="{{ bar_color }}">
 	<meta name="msapplication-TileColor" content="{{ bar_color }}">
 	<meta name="msapplication-TileImage" content="{{ media }}/icon/ms-icon-144x144.png">
 	<meta name="application-name" content="{{ hostname }} - LuCI">
-
 	<link rel="icon" type="image/x-icon" href="{{ media }}/favicon.ico">
 	<link rel="icon" type="image/png" sizes="16x16" href="{{ media }}/icon/favicon-16x16.png">
 	<link rel="icon" type="image/png" sizes="32x32" href="{{ media }}/icon/favicon-32x32.png">
@@ -82,17 +57,13 @@
 	<link rel="apple-touch-icon" sizes="72x72" href="{{ media }}/icon/apple-icon-72x72.png">
 	<link rel="apple-touch-icon" sizes="144x144" href="{{ media }}/icon/apple-icon-144x144.png">
 	<link rel="manifest" href="{{ media }}/icon/manifest.json" crossorigin="use-credentials">
-
 	<link rel="stylesheet" href="{{ media }}/css/cascade.css?v=2.4.3">
+	<link rel="stylesheet" href="{{ media }}/css/idx.css?v=1.0.0">
 	<style title="text/css">
 		{% if (mode == 'normal'): %}
-		@media (prefers-color-scheme: dark) {
-			{{ dark_css }}
-		}
+		@media (prefers-color-scheme: dark) { {{ dark_css }} }
 		{% endif %}
-		{% if (mode == 'dark'): %}
-		{{ dark_css }}
-		{% endif -%}
+		{% if (mode == 'dark'): %} {{ dark_css }} {% endif -%}
 		{% if (access('/etc/config/argon')): %}
 		:root {
 			--primary: {{ primary }};
@@ -104,31 +75,24 @@
 		}
 		{% endif -%}
 	</style>
-	{% if (node?.css): %}
-	<link rel="stylesheet" href="{{ resource }}/{{ node.css}}">
-	{% endif -%}
-	{% if (css): %}
-	<style title="text/css">
-		{{ css }}
-	</style>
-	{% endif -%}
+	{% if (node?.css): %}<link rel="stylesheet" href="{{ resource }}/{{ node.css}}">{% endif -%}
+	{% if (css): %}<style title="text/css">{{ css }}</style>{% endif -%}
+	<script>window.HOSTNAME = '{{ hostname }}';</script>
 	<script src="{{ dispatcher.build_url('admin/translations', dispatcher.lang) }}?v={{ version.luciversion }}"></script>
 	<script src="{{ resource }}/cbi.js?v={{ version.luciversion }}"></script>
 	<script src="{{ resource }}/luci.js?v={{ version.luciversion }}"></script>
+	<script src="{{ media }}/js/idx.js?v=1.0.0"></script>
 </head>
 
 <body class="lang_{{ dispatcher.lang }} {{ node?.title ? ` - ${striptags(node.title)}` : '' }} {% if (ctx.authsession): %}logged-in{% endif %}" data-page="{{ entityencode(join('-', ctx.request_path), true) }}">
-
 	<div class="main">
 		<div class="main-left" id="mainmenu" style="display:none">
 			<div class="sidenav-header d-flex align-items-center">
-				<a class="brand" href="#">{{ hostname }}</a>
+				<a class="brand" href="#" id="hostnameDisplay">{{ hostname }}</a>
 				<div class="ml-auto">
 					<div class="sidenav-toggler d-none d-xl-block active" data-action="sidenav-unpin" data-target="#sidenav-main">
 						<div class="sidenav-toggler-inner">
-							<i class="sidenav-toggler-line"></i>
-							<i class="sidenav-toggler-line"></i>
-							<i class="sidenav-toggler-line"></i>
+							<i class="sidenav-toggler-line"></i><i class="sidenav-toggler-line"></i><i class="sidenav-toggler-line"></i>
 						</div>
 					</div>
 				</div>
@@ -138,102 +102,44 @@
 			<header class="bg-primary">
 				<div class="fill">
 					<div class="container">
-						<div class="flex1">
-							<a class="showSide"></a>
-							<tr>
-								<td><a href='/cgi-bin/luci/admin/network/network'><img src="{{ media }}/navbar/interface.png" width="35" height="35"></a></td>
-								<td><a href='/cgi-bin/luci/admin/system/tinyfm'><img src="{{ media }}/navbar/tinyfm.png" width="35" height="35"></a></td>
-								<td><a href='/cgi-bin/luci/admin/services/droidnet'><img src="{{ media }}/navbar/droidnet.png" width="35" height="35"></a></td>
-								<td><a href='/cgi-bin/luci/admin/modem/3ginfo-lite'><img src="{{ media }}/navbar/modem.png" width="35" height="35"></a></td>
-								<td><a href='/cgi-bin/luci/admin/status/netmonitor'><img src="{{ media }}/navbar/netmon.png" width="35" height="35"></a></td>
-								<td><a href='/cgi-bin/luci/admin/services/openclash'><img src="{{ media }}/navbar/openclash.png" width="35" height="35"></a></td>
-								<td><a href='/cgi-bin/luci/admin/services/nikki'><img src="{{ media }}/navbar/nikki.png" width="35" height="35"></a></td>
-								<td><a href='/cgi-bin/luci/admin/services/passwall'><img src="{{ media }}/navbar/passwall.png" width="35" height="35"></a></td>
-								<!-- <td><a href='/cgi-bin/luci/admin/modem/rakitan'><img src="{{ media }}/navbar/rakitanmanager.png" width="35" height="35"></a></td> -->
-								<!-- <td><a href='/cgi-bin/luci/admin/services/neko'><img src="{{ media }}/navbar/neko.png" width="35" height="35"></a></td> -->
-								<!-- <td><a href='/cgi-bin/luci/admin/services/adguardhome'><img src="{{ media }}/navbar/adguard.png" width="35" height="35"></a></td> -->
-							</tr>
+						<a class="showSide"></a>
+						<nav id='menu'>
+							<ul>
+								<li><a href='http://192.168.8.1/'>Hilink</a></li>
+								<li><a href='http://192.168.1.2/'>Router</a></li>
+								<li><a href='/cgi-bin/luci/admin/network/quenx'>Fix TTL</a></li>
+								<li><a id='zash' href='#' target='_blank'>Zash</a></li>
+								<li><a id='yacd' href='#' target='_blank'>Yacd</a></li>
+							</ul>
+						</nav>
+						<div class="floating-icons-container" id="iconContainer">
+							<div class="nav-arrow" id="prevArrow">‹</div>
+							<div class="floating-icons-xidz">
+								<div class="floating-icons-wrapper" id="iconWrapper">
+									<a href='/cgi-bin/luci/admin/status/overview'><img src="{{ media }}/navbar/home.png"></a>
+									<a href='/cgi-bin/luci/admin/network/network'><img src="{{ media }}/navbar/interface.png"></a>
+									<a href='/cgi-bin/luci/admin/system/tinyfm'><img src="{{ media }}/navbar/tinyfm.png"></a>
+									<a href='/cgi-bin/luci/admin/services/ttyd'><img src="{{ media }}/navbar/terminal.png"></a>
+									<a href='/cgi-bin/luci/admin/services/openclash'><img src="{{ media }}/navbar/openclash.png"></a>
+									<a href='/cgi-bin/luci/admin/status/netmonitor'><img src="{{ media }}/navbar/netmon.png"></a>
+									<a href='/cgi-bin/luci/admin/services/nikki'><img src="{{ media }}/navbar/nikki.png"></a>
+									<a href='/cgi-bin/luci/admin/modem/andromodem'><img src="{{ media }}/navbar/droidnet.png"></a>
+									<a href='/cgi-bin/luci/admin/services/insomclash'><img src="{{ media }}/navbar/insomclash.png"></a>
+									<a href='/cgi-bin/luci/admin/modem/3ginfo-lite'><img src="{{ media }}/navbar/modem.png"></a>
+									<a href='/cgi-bin/luci/admin/services/passwall'><img src="{{ media }}/navbar/passwall.png"></a>
+									<a href='/cgi-bin/luci/admin/modem/modemdata'><img src="{{ media }}/navbar/mikhom.png"></a>
+									<a href='/cgi-bin/luci/admin/services/AdGuardHome'><img src="{{ media }}/navbar/adguard.png"></a>
+									<a href='/cgi-bin/luci/admin/vpn/tailscale'><img src="{{ media }}/navbar/tailscale.png"></a>
+									<a href='/cgi-bin/luci/admin/services/neko'><img src="{{ media }}/navbar/neko.png"></a>
+									<a href='/cgi-bin/luci/admin/modem/rakitanmanager'><img src="{{ media }}/navbar/rakitanmanager.png"></a>
+									<a href='/cgi-bin/luci/admin/logout'><img src="{{ media }}/navbar/logout.png"></a>
+								</div>
+							</div>
+							<div class="nav-arrow" id="nextArrow">›</div>
 						</div>
 						<div class="status" id="indicators"></div>
 					</div>
 				</div>
-				<style>
-					#menu {
-						position: relative;
-						top: -8px;
-						left: 80px;
-						margin: 0;
-						padding: -5px 0;
-					}
-					#menu ul {
-						list-style: none;
-						margin: 0;
-						padding: 0;
-						display: inline-block;
-					}
-					#menu li {
-						display: inline;
-					}
-					#menu a {
-						color: #fff;
-						text-decoration: none;
-						font-size: 13px;
-						margin: 0 3px;
-					}
-					#menu a:hover {
-						text-decoration: underline;
-					}
-				</style>
-				<nav id='menu'>
-					<ul>
-						<li><a href='/cgi-bin/luci/admin/services/ttyd'>Terminal</a></li>
-						<li><a href='http://192.168.8.1/'>Hilink</a></li>
-						<li><a href='http://192.168.1.2/'>Router</a></li>
-						<li><a id='zash' href='#' target='_blank'>Zash</a></li>
-						<li><a id='yacd' href='#' target='_blank'>Yacd</a></li>
-					</ul>
-				</nav>
-				<script>
-				(function(){
-					'use strict';
-					
-					function init() {
-						const zash = document.getElementById('zash');
-						const yacd = document.getElementById('yacd');
-						
-						if (!zash || !yacd) return setTimeout(init, 100);
-						
-						const { hostname } = window.location;
-						const base = `http://${hostname}:9090`;
-						
-						yacd.href = `${base}/ui/yacd/`;
-						
-						function check(url) {
-							return new Promise((resolve, reject) => {
-								const img = new Image();
-								img.onload = () => resolve(url);
-								img.onerror = reject;
-								img.src = `${url}favicon.ico?${Date.now()}`;
-							});
-						}
-						
-						function set(url, color, text) {
-							zash.href = url;
-							zash.style.color = color;
-							zash.textContent = text;
-						}
-						
-						check(`${base}/ui/Nikki/`)
-							.then(url => set(`${url}?host=${hostname}&port=9090`, '#0f0', 'Nikki'))
-							.catch(() => check(`${base}/ui/zashboard/`)
-								.then(url => set(url, '#0f0', 'Clash'))
-								.catch(() => set(`${base}/ui/zashboard/`, '#fff', 'Zash')));
-					}
-					
-					document.readyState === 'loading' ? 
-						document.addEventListener('DOMContentLoaded', init) : init();
-				})();
-				</script>
 			</header>
 			<div class="darkMask"></div>
 			<div id="maincontent">
@@ -247,12 +153,10 @@
 						{% endif %}
 					</div>
 					{% endif %}
-
 					<noscript>
 						<div class="alert-message error">
 							<h4>{{ _('JavaScript required!') }}</h4>
 							<p>{{ _('You must enable JavaScript in your browser or LuCI will not work properly.') }}</p>
 						</div>
 					</noscript>
-
 					<div id="tabmenu" style="display:none"></div>
