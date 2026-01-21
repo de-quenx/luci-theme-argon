@@ -1,0 +1,202 @@
+(function(){
+	'use strict';
+	
+	function init() {
+		const zash = document.getElementById('zash');
+		const yacd = document.getElementById('yacd');
+		if (!zash || !yacd) return setTimeout(init, 100);
+		
+		const { hostname } = window.location;
+		const base = `http://${hostname}:9090`;
+		yacd.href = `${base}/ui/yacd/`;
+		
+		function checkService(url, timeout = 3000) {
+			return new Promise((resolve, reject) => {
+				const img = new Image();
+				const timer = setTimeout(() => {
+					img.onload = img.onerror = null;
+					reject(new Error('timeout'));
+				}, timeout);
+				
+				img.onload = () => {
+					clearTimeout(timer);
+					resolve(url);
+				};
+				img.onerror = () => {
+					clearTimeout(timer);
+					reject(new Error('failed'));
+				};
+				img.src = `${url}favicon.ico?${Date.now()}`;
+			});
+		}
+		
+		function set(url, color, text) {
+			zash.href = url;
+			zash.style.color = color + ' !important';
+			zash.style.setProperty('color', color, 'important');
+			zash.textContent = text;
+		}
+
+		async function checkServices() {
+			try {
+				const nikkiUrl = `${base}/ui/Nikki/`;
+				await checkService(nikkiUrl);
+				set(`${nikkiUrl}?host=${hostname}&port=9090`, '#00ff00', 'Nikki');
+				return;
+			} catch {}
+
+			try {
+				const zashUrl = `${base}/ui/zashboard/`;
+				await checkService(zashUrl);
+				set(zashUrl, '#00ff00', 'Clash');
+				return;
+			} catch {}
+
+			set(`${base}/ui/zashboard/`, '#ffffff', 'Zash');
+		}
+
+		checkServices();
+		setInterval(checkServices, 420000);
+
+		const hostnameElement = document.getElementById('hostnameDisplay');
+		const hostname_text = window.HOSTNAME || hostname;
+		const texts = ['WELCOME', hostname_text, 'PROJECT'];
+		let currentTextIndex = 0;
+		let currentText = '';
+		let charIndex = 0;
+		let isDeleting = false;
+
+		function typewriterEffect() {
+			const fullText = texts[currentTextIndex];
+
+			if (!isDeleting && charIndex < fullText.length) {
+				currentText += fullText.charAt(charIndex);
+				charIndex++;
+			} else if (isDeleting && charIndex > 0) {
+				currentText = currentText.slice(0, -1);
+				charIndex--;
+			}
+
+			if (hostnameElement) {
+				hostnameElement.textContent = currentText;
+			}
+
+			if (!isDeleting && charIndex === fullText.length) {
+				setTimeout(() => {
+					isDeleting = true;
+					typewriterEffect();
+				}, 1800);
+			} else if (isDeleting && charIndex === 0) {
+				setTimeout(() => {
+					currentTextIndex = (currentTextIndex + 1) % texts.length;
+					isDeleting = false;
+					typewriterEffect();
+				}, 1400);
+			} else {
+				setTimeout(typewriterEffect, isDeleting ? 140 : 220);
+			}
+		}
+
+		if (hostnameElement) {
+			hostnameElement.textContent = '';
+			setTimeout(typewriterEffect, 1000);
+		}
+
+		const container = document.querySelector('.floating-icons-xidz');
+		const wrapper = document.getElementById('iconWrapper');
+		const prevArrow = document.getElementById('prevArrow');
+		const nextArrow = document.getElementById('nextArrow');
+		
+		if (!container || !wrapper || !prevArrow || !nextArrow) {
+			return setTimeout(init, 100);
+		}
+		
+		let currentIndex = parseInt(localStorage.getItem('iconScrollPosition') || '0');
+		let isDesktop = window.innerWidth > 600;
+		let maxVisibleIcons = isDesktop ? 8 : 6;
+		let totalIcons = wrapper.children.length;
+		let maxIndex = Math.max(0, totalIcons - maxVisibleIcons);
+
+		function updateIconPosition() {
+			const iconWidth = isDesktop ? 55 : 40;
+			const gap = isDesktop ? 8 : 6;
+			const translateX = -(currentIndex * (iconWidth + gap));
+			wrapper.style.transform = `translateX(${translateX}px)`;
+			localStorage.setItem('iconScrollPosition', currentIndex.toString());
+		}
+
+		if (currentIndex > maxIndex) {
+			currentIndex = maxIndex;
+		}
+		updateIconPosition();
+
+		function slideNext() {
+			if (currentIndex < maxIndex) {
+				currentIndex++;
+				updateIconPosition();
+			}
+		}
+
+		function slidePrev() {
+			if (currentIndex > 0) {
+				currentIndex--;
+				updateIconPosition();
+			}
+		}
+
+		nextArrow.addEventListener('click', slideNext);
+		prevArrow.addEventListener('click', slidePrev);
+
+		let startX = 0;
+		let isDragging = false;
+		let dragThreshold = 50;
+
+		function handleStart(e) {
+			startX = e.touches ? e.touches[0].clientX : e.clientX;
+			isDragging = true;
+		}
+
+		function handleMove(e) {
+			if (!isDragging) return;
+			e.preventDefault();
+		}
+
+		function handleEnd(e) {
+			if (!isDragging) return;
+			isDragging = false;
+			
+			const endX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
+			const diff = startX - endX;
+
+			if (Math.abs(diff) > dragThreshold) {
+				if (diff > 0 && currentIndex < maxIndex) {
+					currentIndex++;
+				} else if (diff < 0 && currentIndex > 0) {
+					currentIndex--;
+				}
+				updateIconPosition();
+			}
+		}
+
+		container.addEventListener('mousedown', handleStart);
+		container.addEventListener('mousemove', handleMove);
+		container.addEventListener('mouseup', handleEnd);
+		container.addEventListener('mouseleave', handleEnd);
+		
+		container.addEventListener('touchstart', handleStart, { passive: true });
+		container.addEventListener('touchmove', handleMove, { passive: false });
+		container.addEventListener('touchend', handleEnd, { passive: true });
+
+		window.addEventListener('resize', function() {
+			isDesktop = window.innerWidth > 600;
+			maxVisibleIcons = isDesktop ? 8 : 6;
+			maxIndex = Math.max(0, totalIcons - maxVisibleIcons);
+			if (currentIndex > maxIndex) {
+				currentIndex = maxIndex;
+			}
+			updateIconPosition();
+		});
+	}
+	
+	document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();
+})();
