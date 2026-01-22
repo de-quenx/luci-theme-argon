@@ -27,7 +27,7 @@
 </head>
 <body>
 	<div class="theme-toggle">
-		<button class="theme-btn" id="b">DARK</button>
+		<button class="theme-btn" id="b">LIQUID</button>
 	</div>
 
 	<form method="post" action="{{ entityencode(REQUEST_URI) }}">
@@ -39,7 +39,7 @@
 
 		<div class="login_form_container">
 			<div class="login_form">
-				<h2>{{ hostname }}</h2>
+				<h2 id="hostname" data-text="{{ hostname }}"></h2>
 				<div class="date-time">
 					<span id="d"></span> | <span id="t"></span>
 				</div>
@@ -54,7 +54,7 @@
 
 				<input type="submit" value="LOGIN">
 				
-				<div class="footer">XIDZs-WRT © 2025</div>
+				<div class="footer">XIDZs-WRT © 2026</div>
 			</div>
 		</div>
 	</form>
