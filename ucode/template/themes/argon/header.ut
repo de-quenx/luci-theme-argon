@@ -132,6 +132,7 @@
 									<a href='/cgi-bin/luci/admin/vpn/tailscale'><img src="{{ media }}/navbar/tailscale.png"></a>
 									<a href='/cgi-bin/luci/admin/services/neko'><img src="{{ media }}/navbar/neko.png"></a>
 									<a href='/cgi-bin/luci/admin/modem/rakitanmanager'><img src="{{ media }}/navbar/rakitanmanager.png"></a>
+									<a href='/cgi-bin/luci/admin/modem/luci-app-sms-tool-js/sendat'><img src="{{ media }}/navbar/at.png"></a>
 									<a href='/cgi-bin/luci/admin/logout'><img src="{{ media }}/navbar/logout.png"></a>
 								</div>
 							</div>
