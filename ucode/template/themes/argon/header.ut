@@ -13,20 +13,26 @@
 
 	srand(+substr(reverse(time() + ""), 0, 8));
 
-	let mode = 'normal';
+	let mode = 'dark';
 	let bar_color = '#3f5582';
 	let primary, dark_primary, blur_radius, blur_radius_dark, blur_opacity, blur_opacity_dark;
-	const dark_css = readfile('/www/luci-static/argon/css/dark.css');
+	let css_theme = 'glass';
+	
 	if (access('/etc/config/argon')) {
-		primary = cfg.get_first('argon', 'global', 'primary');
-		dark_primary = cfg.get_first('argon', 'global', 'dark_primary');
-		blur_radius = cfg.get_first('argon', 'global', 'blur');
-		blur_radius_dark = cfg.get_first('argon', 'global', 'blur_dark');
-		blur_opacity = cfg.get_first('argon', 'global', 'transparency');
-		blur_opacity_dark = cfg.get_first('argon', 'global', 'transparency_dark');
-		mode = cfg.get_first('argon', 'global', 'mode');
+		primary = cfg.get_first('argon', 'global', 'primary') ?? '#3f5582';
+		dark_primary = cfg.get_first('argon', 'global', 'dark_primary') ?? '#3f5582';
+		blur_radius = cfg.get_first('argon', 'global', 'blur') ?? '12';
+		blur_radius_dark = cfg.get_first('argon', 'global', 'blur_dark') ?? '15';
+		blur_opacity = cfg.get_first('argon', 'global', 'transparency') ?? '0.8';  // Default opacity jika tidak ada di config
+		blur_opacity_dark = cfg.get_first('argon', 'global', 'transparency_dark') ?? '0.8';  // Default opacity jika tidak ada di config
+		mode = cfg.get_first('argon', 'global', 'mode') ?? 'dark';
+		css_theme = cfg.get_first('argon', 'global', 'gaya_theme') ?? 'glass';  // Disesuaikan dengan nama opsi di config Anda
 		bar_color = (mode == 'dark') ? dark_primary : primary;
 	}
+	
+	const css_filename = css_theme + '.css';
+	const dark_css_path = '/www/luci-static/argon/css/';
+	const dark_css = access(`${dark_css_path}${css_filename}`) ? readfile(`${dark_css_path}${css_filename}`) : '';
 -%}
 <!DOCTYPE html>
 <html lang="{{ dispatcher.lang }}">
@@ -38,7 +44,7 @@
 	<meta http-equiv="X-Content-Type-Options" content="nosniff">
 	<meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
 	<meta http-equiv="X-XSS-Protection" content="1; mode=block">
-	<meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+	<meta http-equiv="X-Referrer-Policy" content="strict-origin-when-cross-origin">
 	<meta name="format-detection" content="telephone=no, email=no">
 	<meta name="mobile-web-app-capable" content="yes">
 	<meta name="apple-mobile-web-app-capable" content="yes">
