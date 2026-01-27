@@ -1,0 +1,9 @@
+config global 'global'
+	# normal / light / dark
+	option mode 'normal'
+	option primary '#3f5582'
+	option dark_primary '#3f5582'
+	option blur '12'
+	option blur_dark '15'
+	# dark / glass | set mode 'dark'
+	option gaya_theme 'glass'
