@@ -30,7 +30,7 @@
 		<button class="theme-btn" id="b">LIQUID</button>
 	</div>
 
-	<form method="post" action="/cgi-bin/luci/admin/login">
+	<form method="post" action="{{ entityencode(REQUEST_URI) }}">
 		{% if (fuser): %}
 		<div class="alert-message" id="a">
 			Invalid username and/or password! Please try again.
@@ -53,7 +53,6 @@
 				</div>
 
 				<input type="submit" value="LOGIN">
-				<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
 				
 				<div class="footer">XIDZs-WRT © 2026</div>
 			</div>
@@ -64,28 +63,13 @@
 	
 	{% if (has_https): %}
 	<script>
-	(function(){
-		'use strict';
-		
-		if (document.location.protocol !== 'https:' && !sessionStorage.getItem('auth_redirect')) {
-			sessionStorage.setItem('auth_redirect', '1');
-			
-			document.cookie = 'sysauth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.{{ hostname }}';
-			document.cookie = 'redirect_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/';
-			
-			const port = {{ https_port || 443 }};
-			const hostname = window.location.hostname;
-			const pathname = '/cgi-bin/luci/admin/login';
-			
-			const redirectUrl = `https://${hostname}:${port}${pathname}`;
-			window.location.replace(redirectUrl);
-			return;
+		if(document.location.protocol!=='https:'){
+			const img=new Image();
+			const url=`https://${window.location.hostname}:{{ https_port }}{{ resource }}/icons/loading.gif?${Math.random()}`;
+			img.onload=()=>window.location.href=`https://${window.location.hostname}:{{ https_port }}${window.location.pathname}`;
+			img.src=url;
+			setTimeout(()=>img.src='',60)
 		}
-		
-		if (document.location.protocol === 'https:') {
-			sessionStorage.removeItem('auth_redirect');
-		}
-	})();
 	</script>
 	{% endif %}
 </body>
