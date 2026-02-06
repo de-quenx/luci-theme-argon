@@ -14,25 +14,41 @@
 	srand(+substr(reverse(time() + ""), 0, 8));
 
 	let mode = 'dark';
-	let bar_color = '#3f5582';
+	let bar_color = '#1a2538';
 	let primary, dark_primary, blur_radius, blur_radius_dark, blur_opacity, blur_opacity_dark;
 	let css_theme = 'glass';
 	
 	if (access('/etc/config/argon')) {
-		primary = cfg.get_first('argon', 'global', 'primary') ?? '#3f5582';
-		dark_primary = cfg.get_first('argon', 'global', 'dark_primary') ?? '#3f5582';
-		blur_radius = cfg.get_first('argon', 'global', 'blur') ?? '12';
-		blur_radius_dark = cfg.get_first('argon', 'global', 'blur_dark') ?? '15';
-		blur_opacity = cfg.get_first('argon', 'global', 'transparency') ?? '0.8';  // Default opacity jika tidak ada di config
-		blur_opacity_dark = cfg.get_first('argon', 'global', 'transparency_dark') ?? '0.8';  // Default opacity jika tidak ada di config
-		mode = cfg.get_first('argon', 'global', 'mode') ?? 'dark';
-		css_theme = cfg.get_first('argon', 'global', 'gaya_theme') ?? 'glass';  // Disesuaikan dengan nama opsi di config Anda
-		bar_color = (mode == 'dark') ? dark_primary : primary;
+		primary          = cfg.get_first('argon', 'global', 'primary')          ?? '#3f5582';
+		dark_primary     = cfg.get_first('argon', 'global', 'dark_primary')     ?? '#1a2538';
+		blur_radius      = cfg.get_first('argon', 'global', 'blur')             ?? '12';
+		blur_radius_dark = cfg.get_first('argon', 'global', 'blur_dark')        ?? '15';
+		blur_opacity     = cfg.get_first('argon', 'global', 'transparency')     ?? '0.8';
+		blur_opacity_dark = cfg.get_first('argon', 'global', 'transparency_dark') ?? '0.8';
+		mode             = cfg.get_first('argon', 'global', 'mode')             ?? 'dark';
+		css_theme        = cfg.get_first('argon', 'global', 'gaya_theme')       ?? 'glass';
+		bar_color        = (mode == 'dark') ? dark_primary : primary;
 	}
 	
-	const css_filename = css_theme + '.css';
 	const dark_css_path = '/www/luci-static/argon/css/';
-	const dark_css = access(`${dark_css_path}${css_filename}`) ? readfile(`${dark_css_path}${css_filename}`) : '';
+	
+	let glass_css = access(`${dark_css_path}glass.css`) ? readfile(`${dark_css_path}glass.css`) : '';
+	let blue_css  = access(`${dark_css_path}blue.css`)  ? readfile(`${dark_css_path}blue.css`)  : '';
+	let sdark_css = access(`${dark_css_path}sdark.css`) ? readfile(`${dark_css_path}sdark.css`) : '';
+	let dark_css  = access(`${dark_css_path}dark.css`)  ? readfile(`${dark_css_path}dark.css`)  : '';
+	let mint_css  = access(`${dark_css_path}mint.css`)  ? readfile(`${dark_css_path}mint.css`)  : '';
+	let gold_css  = access(`${dark_css_path}gold.css`)  ? readfile(`${dark_css_path}gold.css`)  : '';
+	let redx_css  = access(`${dark_css_path}redx.css`)  ? readfile(`${dark_css_path}redx.css`)  : '';
+	
+	let theme_css = 
+		(css_theme == 'blue')  ? blue_css  :
+		(css_theme == 'sdark') ? sdark_css :
+		(css_theme == 'dark')  ? dark_css  :
+		(css_theme == 'mint')  ? mint_css  :
+		(css_theme == 'glass') ? glass_css :
+		(css_theme == 'gold')  ? gold_css  :
+		(css_theme == 'redx')  ? redx_css  :
+		glass_css;
 -%}
 <!DOCTYPE html>
 <html lang="{{ dispatcher.lang }}">
@@ -67,17 +83,17 @@
 	<link rel="stylesheet" href="{{ media }}/css/idx.css?v=1.0.0">
 	<style title="text/css">
 		{% if (mode == 'normal'): %}
-		@media (prefers-color-scheme: dark) { {{ dark_css }} }
+		@media (prefers-color-scheme: dark) { {{ theme_css }} }
 		{% endif %}
-		{% if (mode == 'dark'): %} {{ dark_css }} {% endif -%}
+		{% if (mode == 'dark'): %} {{ theme_css }} {% endif -%}
 		{% if (access('/etc/config/argon')): %}
 		:root {
 			--primary: {{ primary }};
 			--dark-primary: {{ dark_primary }};
-			--blur-radius:{{ blur_radius }}px;
-			--blur-opacity:{{ blur_opacity }};
-			--blur-radius-dark:{{ blur_radius_dark }}px;
-			--blur-opacity-dark:{{ blur_opacity_dark }};
+			--blur-radius: {{ blur_radius }}px;
+			--blur-opacity: {{ blur_opacity }};
+			--blur-radius-dark: {{ blur_radius_dark }}px;
+			--blur-opacity-dark: {{ blur_opacity_dark }};
 		}
 		{% endif -%}
 	</style>
