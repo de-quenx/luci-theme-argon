@@ -13,11 +13,10 @@
 
 	srand(+substr(reverse(time() + ""), 0, 8));
 
-	let mode = 'dark';
-	let bar_color = '#1a2538';
-	let primary, dark_primary, blur_radius, blur_radius_dark, blur_opacity, blur_opacity_dark;
-	let css_theme = 'glass';
-	
+	let mode = 'normal';
+	let bar_color = '#5e72e4';
+	let primary, dark_primary, blur_radius, blur_radius_dark, blur_opacity, blur_opacity_dark, css_theme;
+
 	if (access('/etc/config/argon')) {
 		primary          = cfg.get_first('argon', 'global', 'primary')          ?? '#3f5582';
 		dark_primary     = cfg.get_first('argon', 'global', 'dark_primary')     ?? '#1a2538';
@@ -49,27 +48,34 @@
 		(css_theme == 'gold')  ? gold_css  :
 		(css_theme == 'redx')  ? redx_css  :
 		glass_css;
+
 -%}
 <!DOCTYPE html>
 <html lang="{{ dispatcher.lang }}">
+
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<title>{{ hostname }}{{ node?.title ? ` - ${striptags(node.title)}` : '' }} - LuCI</title>
+
 	<meta name="robots" content="noindex, nofollow">
+
 	<meta http-equiv="X-Content-Type-Options" content="nosniff">
 	<meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
 	<meta http-equiv="X-XSS-Protection" content="1; mode=block">
-	<meta http-equiv="X-Referrer-Policy" content="strict-origin-when-cross-origin">
+	<meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+
 	<meta name="format-detection" content="telephone=no, email=no">
 	<meta name="mobile-web-app-capable" content="yes">
 	<meta name="apple-mobile-web-app-capable" content="yes">
 	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 	<meta name="apple-mobile-web-app-title" content="{{ hostname }} - LuCI">
+
 	<meta name="theme-color" content="{{ bar_color }}">
 	<meta name="msapplication-TileColor" content="{{ bar_color }}">
 	<meta name="msapplication-TileImage" content="{{ media }}/icon/ms-icon-144x144.png">
 	<meta name="application-name" content="{{ hostname }} - LuCI">
+
 	<link rel="icon" type="image/x-icon" href="{{ media }}/favicon.ico">
 	<link rel="icon" type="image/png" sizes="16x16" href="{{ media }}/icon/favicon-16x16.png">
 	<link rel="icon" type="image/png" sizes="32x32" href="{{ media }}/icon/favicon-32x32.png">
@@ -79,42 +85,56 @@
 	<link rel="apple-touch-icon" sizes="72x72" href="{{ media }}/icon/apple-icon-72x72.png">
 	<link rel="apple-touch-icon" sizes="144x144" href="{{ media }}/icon/apple-icon-144x144.png">
 	<link rel="manifest" href="{{ media }}/icon/manifest.json" crossorigin="use-credentials">
-	<link rel="stylesheet" href="{{ media }}/css/cascade.css?v=2.4.3">
-	<link rel="stylesheet" href="{{ media }}/css/idx.css?v=1.0.0">
+
+	<link rel="stylesheet" href="{{ media }}/css/cascade.css{# ?v=PKG_VERSION #}">
 	<style title="text/css">
 		{% if (mode == 'normal'): %}
-		@media (prefers-color-scheme: dark) { {{ theme_css }} }
+			@media (prefers-color-scheme: dark) {
+				{{ theme_css }}
+			}
 		{% endif %}
-		{% if (mode == 'dark'): %} {{ theme_css }} {% endif -%}
+		{% if (mode == 'dark'): %}
+			{{ theme_css }}
+		{% endif -%}
 		{% if (access('/etc/config/argon')): %}
 		:root {
 			--primary: {{ primary }};
 			--dark-primary: {{ dark_primary }};
-			--blur-radius: {{ blur_radius }}px;
-			--blur-opacity: {{ blur_opacity }};
-			--blur-radius-dark: {{ blur_radius_dark }}px;
-			--blur-opacity-dark: {{ blur_opacity_dark }};
+			--blur-radius:{{ blur_radius }}px;
+			--blur-opacity:{{ blur_opacity }};
+			--blur-radius-dark:{{ blur_radius_dark }}px;
+			--blur-opacity-dark:{{ blur_opacity_dark }};
 		}
 		{% endif -%}
 	</style>
-	{% if (node?.css): %}<link rel="stylesheet" href="{{ resource }}/{{ node.css}}">{% endif -%}
-	{% if (css): %}<style title="text/css">{{ css }}</style>{% endif -%}
-	<script>window.HOSTNAME = '{{ hostname }}';</script>
+	{% if (node?.css): %}
+	<link rel="stylesheet" href="{{ resource }}/{{ node.css}}">
+	{% endif -%}
+	{% if (css): %}
+	<style title="text/css">
+		{{ css }}
+	</style>
+	{% endif -%}
 	<script src="{{ dispatcher.build_url('admin/translations', dispatcher.lang) }}?v={{ version.luciversion }}"></script>
 	<script src="{{ resource }}/cbi.js?v={{ version.luciversion }}"></script>
 	<script src="{{ resource }}/luci.js?v={{ version.luciversion }}"></script>
-	<script src="{{ media }}/js/idx.js?v=1.0.0"></script>
 </head>
 
-<body class="lang_{{ dispatcher.lang }} {{ node?.title ? ` - ${striptags(node.title)}` : '' }} {% if (ctx.authsession): %}logged-in{% endif %}" data-page="{{ entityencode(join('-', ctx.request_path), true) }}">
+<body
+	class="lang_{{ dispatcher.lang }} {{ node?.title ? ` - ${striptags(node.title)}` : '' }} {% if (ctx.authsession): %}logged-in{% endif %}"
+	data-page="{{ entityencode(join('-', ctx.request_path), true) }}">
+
 	<div class="main">
 		<div class="main-left" id="mainmenu" style="display:none">
 			<div class="sidenav-header d-flex align-items-center">
-				<a class="brand" href="#" id="hostnameDisplay">{{ hostname }}</a>
+				<a class="brand" href="#">{{ hostname }}</a>
 				<div class="ml-auto">
-					<div class="sidenav-toggler d-none d-xl-block active" data-action="sidenav-unpin" data-target="#sidenav-main">
+					<div class="sidenav-toggler d-none d-xl-block active" data-action="sidenav-unpin"
+						data-target="#sidenav-main">
 						<div class="sidenav-toggler-inner">
-							<i class="sidenav-toggler-line"></i><i class="sidenav-toggler-line"></i><i class="sidenav-toggler-line"></i>
+							<i class="sidenav-toggler-line"></i>
+							<i class="sidenav-toggler-line"></i>
+							<i class="sidenav-toggler-line"></i>
 						</div>
 					</div>
 				</div>
@@ -124,41 +144,9 @@
 			<header class="bg-primary">
 				<div class="fill">
 					<div class="container">
-						<a class="showSide"></a>
-						<nav id='menu'>
-							<ul>
-								<li><a href='http://192.168.8.1/'>Hilink</a></li>
-								<li><a href='http://192.168.1.2/'>Router</a></li>
-								<li><a href='/cgi-bin/luci/admin/network/quenx'>Fix TTL</a></li>
-								<li><a id='zash' href='#' target='_blank'>Zash</a></li>
-								<li><a id='yacd' href='#' target='_blank'>Yacd</a></li>
-							</ul>
-						</nav>
-						<div class="floating-icons-container" id="iconContainer">
-							<div class="nav-arrow" id="prevArrow">‹</div>
-							<div class="floating-icons-xidz">
-								<div class="floating-icons-wrapper" id="iconWrapper">
-									<a href='/cgi-bin/luci/admin/status/overview'><img src="{{ media }}/navbar/home.png"></a>
-									<a href='/cgi-bin/luci/admin/network/network'><img src="{{ media }}/navbar/interface.png"></a>
-									<a href='/cgi-bin/luci/admin/system/tinyfm'><img src="{{ media }}/navbar/tinyfm.png"></a>
-									<a href='/cgi-bin/luci/admin/services/ttyd'><img src="{{ media }}/navbar/terminal.png"></a>
-									<a href='/cgi-bin/luci/admin/services/openclash'><img src="{{ media }}/navbar/openclash.png"></a>
-									<a href='/cgi-bin/luci/admin/status/netmonitor'><img src="{{ media }}/navbar/netmon.png"></a>
-									<a href='/cgi-bin/luci/admin/services/nikki'><img src="{{ media }}/navbar/nikki.png"></a>
-									<a href='/cgi-bin/luci/admin/modem/andromodem'><img src="{{ media }}/navbar/droidnet.png"></a>
-									<a href='/cgi-bin/luci/admin/services/insomclash'><img src="{{ media }}/navbar/insomclash.png"></a>
-									<a href='/cgi-bin/luci/admin/modem/3ginfo-lite'><img src="{{ media }}/navbar/modem.png"></a>
-									<a href='/cgi-bin/luci/admin/services/passwall'><img src="{{ media }}/navbar/passwall.png"></a>
-									<a href='/cgi-bin/luci/admin/modem/modemdata'><img src="{{ media }}/navbar/mikhom.png"></a>
-									<a href='/cgi-bin/luci/admin/services/AdGuardHome'><img src="{{ media }}/navbar/adguard.png"></a>
-									<a href='/cgi-bin/luci/admin/vpn/tailscale'><img src="{{ media }}/navbar/tailscale.png"></a>
-									<a href='/cgi-bin/luci/admin/services/neko'><img src="{{ media }}/navbar/neko.png"></a>
-									<a href='/cgi-bin/luci/admin/modem/rakitanmanager'><img src="{{ media }}/navbar/rakitanmanager.png"></a>
-									<a href='/cgi-bin/luci/admin/modem/luci-app-sms-tool-js/sendat'><img src="{{ media }}/navbar/at.png"></a>
-									<a href='/cgi-bin/luci/admin/logout'><img src="{{ media }}/navbar/logout.png"></a>
-								</div>
-							</div>
-							<div class="nav-arrow" id="nextArrow">›</div>
+						<div class="flex1">
+							<a class="showSide"></a>
+							<a class="brand" href="#">{{ hostname }}</a>
 						</div>
 						<div class="status" id="indicators"></div>
 					</div>
@@ -176,10 +164,12 @@
 						{% endif %}
 					</div>
 					{% endif %}
-					<noscript>
-						<div class="alert-message error">
-							<h4>{{ _('JavaScript required!') }}</h4>
-							<p>{{ _('You must enable JavaScript in your browser or LuCI will not work properly.') }}</p>
-						</div>
-					</noscript>
+
+				<noscript>
+					<div class="alert-message error">
+						<h4>{{ _('JavaScript required!') }}</h4>
+						<p>{{ _('You must enable JavaScript in your browser or LuCI will not work properly.') }}</p>
+					</div>
+				</noscript>
+
 					<div id="tabmenu" style="display:none"></div>
