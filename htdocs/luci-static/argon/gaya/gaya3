@@ -146,7 +146,7 @@
 									<a href='/cgi-bin/luci/admin/status/netmonitor'><img src="{{ media }}/navbar/netmon.png"></a>
 									<a href='/cgi-bin/luci/admin/services/nikki'><img src="{{ media }}/navbar/nikki.png"></a>
 									<a href='/cgi-bin/luci/admin/modem/andromodem'><img src="{{ media }}/navbar/droidnet.png"></a>
-									<a href='/cgi-bin/luci/admin/services/insomclash'><img src="{{ media }}/navbar/insomclash.png"></a>
+									<a href='/cgi-bin/luci/admin/services/fusiontunx'><img src="{{ media }}/navbar/insomclash.png"></a>
 									<a href='/cgi-bin/luci/admin/modem/3ginfo-lite'><img src="{{ media }}/navbar/modem.png"></a>
 									<a href='/cgi-bin/luci/admin/services/passwall'><img src="{{ media }}/navbar/passwall.png"></a>
 									<a href='/cgi-bin/luci/admin/modem/modemdata'><img src="{{ media }}/navbar/mikhom.png"></a>

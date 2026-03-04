@@ -169,6 +169,7 @@
 								<td><a href='/cgi-bin/luci/admin/modem/3ginfo-lite'><img src="{{ media }}/navbar/modem.png" width="35" height="35"></a></td>
 								<td><a href='/cgi-bin/luci/admin/status/netmonitor'><img src="{{ media }}/navbar/netmon.png" width="35" height="35"></a></td>
 								<!-- <td><a href='/cgi-bin/luci/admin/services/openclash'><img src="{{ media }}/navbar/openclash.png" width="35" height="35"></a></td> -->
+								<!-- <td><a href='/cgi-bin/luci/admin/services/fusiontunx'><img src="{{ media }}/navbar/insomclash.png" width="35" height="35"></a></td> -->
 								<!-- <td><a href='/cgi-bin/luci/admin/services/nikki'><img src="{{ media }}/navbar/nikki.png" width="35" height="35"></a></td> -->
 								<!-- <td><a href='/cgi-bin/luci/admin/services/passwall'><img src="{{ media }}/navbar/passwall.png" width="35" height="35"></a></td> -->
 								<!-- <td><a href='/cgi-bin/luci/admin/modem/rakitan'><img src="{{ media }}/navbar/rakitanmanager.png" width="35" height="35"></a></td> -->
