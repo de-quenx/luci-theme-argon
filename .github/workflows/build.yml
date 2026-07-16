@@ -79,11 +79,9 @@ jobs:
           - arch: x86_64
             branch: openwrt-24.10
             package_format: ipk
-            artifact_suffix: openwrt-23.05-24.10
           - arch: x86_64
             branch: openwrt-25.12
             package_format: apk
-            artifact_suffix: openwrt-25.12
 
     steps:
       - name: Checkout repository
@@ -122,13 +120,7 @@ jobs:
             exit 1
           fi
 
-          BASE_NAME=$(basename "$PACKAGE_FILE")
-
-          if [[ "${{ matrix.package_format }}" == "ipk" ]]; then
-            TARGET_NAME="${BASE_NAME%.ipk}_${{ matrix.artifact_suffix }}.ipk"
-          else
-            TARGET_NAME="${BASE_NAME%.apk}_${{ matrix.artifact_suffix }}.apk"
-          fi
+          TARGET_NAME=$(basename "$PACKAGE_FILE")
 
           cp "$PACKAGE_FILE" "${{ github.workspace }}/release-artifacts/$TARGET_NAME"
           ls -la "${{ github.workspace }}/release-artifacts/"
